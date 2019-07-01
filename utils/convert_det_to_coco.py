@@ -5,8 +5,9 @@ import sys
 sys.path.append('../')
 # from datasets import coco
 from pycocotools import coco
+
 def convert(detpath, jsonpath):
-    co = coco.COCO('/hdfs/resrchvc/v-tich/cls/data/coco/annotations/instances_val2017.json')
+    co = coco.COCO('/scratch/ganswindt/retinanet/COCO/DIR/annotations/instances_val.json')
     ids = co.getCatIds()   
     with open(detpath, 'r') as f:
         lines = f.readlines()
