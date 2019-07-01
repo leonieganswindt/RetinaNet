@@ -70,8 +70,10 @@ python test.py -m log/coco_baseline/model_dump/epochxxx.pth -ds COCO -e coco_bas
 Open the Jupyter Notebook:
 
 ```
-''
+'Retinanet_Visualization.ipynb'
 ```
+
+and follow the instructions:
 
  - Change the path to the image and where to store the image
  - Run the Notebook
@@ -79,7 +81,7 @@ Open the Jupyter Notebook:
 
 ## Authors
 
-* **Leonie Ganswindt** - *Initial work*
+* **Leonie Ganswindt** 
 
 
 ## Acknowledgments
