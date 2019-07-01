@@ -54,7 +54,7 @@ class AnchorLayer:
         cls_targets[max_ious < neg_thresh] = 0
         # ignore
         cls_targets[(max_ious > neg_thresh) & (max_ious < pos_thresh)] = -1
-        return cls_targets, box_targets
+        return cls_targets, box_targets, xyxy_anchors
 
 
 if __name__ == '__main__':
