@@ -5,6 +5,8 @@ import numpy as np
 from Cython.Build import cythonize
 from Cython.Distutils import build_ext
 
+"-DCUDA_HOST_COMPILER=/usr/bin/gcc-6"
+
 # extensions
 ext_args = dict(
     include_dirs=[np.get_include()],
@@ -16,9 +18,9 @@ ext_args = dict(
 )
 
 extensions = [
-    Extension('cpu_nms', ['cpu_nms.pyx'], **ext_args),
+    Extension('cpu_nms', ["cpu_nms.pyx"], **ext_args),
     Extension('cpu_soft_nms', ['cpu_soft_nms.pyx'], **ext_args),
-    Extension('gpu_nms', ['gpu_nms.pyx', 'nms_kernel.cu'], **ext_args),
+    Extension('gpu_nms', ['gpu_nms.pyx', './nms_kernel.cu'], **ext_args),
 ]
 
 
