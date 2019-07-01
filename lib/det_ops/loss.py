@@ -56,9 +56,11 @@ class SigmoidFocalLoss(nn.Module):
         weight = self.alpha*((1-pred_sigmoid).pow(self.gamma))*onehot \
             + (1-self.alpha)*(pred_sigmoid.pow(self.gamma))*(1-onehot)
         weight = weight * mask
+        #print(weight)
+        weight = weight.detach()
         avg_factor = torch.sum(target > 0, dim=1).float()
         # embed()
-        loss = F.binary_cross_entropy_with_logits(pred, onehot, weight, reduction='none').sum(dim=1).sum(dim=1)
+        loss = F.binary_cross_entropy_with_logits(input=pred, target=onehot, weight=weight, reduction='none').sum(dim=1).sum(dim=1)
         loss = loss.div_(avg_factor.clamp(min=1.0)).mean()
 
         return loss
