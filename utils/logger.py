@@ -4,6 +4,7 @@ Training Logger
 
 """
 import torch
+from cfgs import config as cfg
 
 
 class Logger:
@@ -14,6 +15,8 @@ class Logger:
 
 def save_checkpoints(model, optimizer, epoch, iteration, path):
 
+    config = cfg.config['coco_baseline']
+
     state_dict = {
         "model": model.state_dict(),
         "optimizer": optimizer.state_dict(),
@@ -21,7 +24,8 @@ def save_checkpoints(model, optimizer, epoch, iteration, path):
         "iteration": iteration
     }
 
-    torch.save(state_dict, path)
+    if epoch % 100 == 0 or epoch == (config['epochs'] - 1):
+        torch.save(state_dict, path)
 
 
 def load_checkpoints(path):
