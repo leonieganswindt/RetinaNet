@@ -54,6 +54,7 @@ def create_minibatch_func(config):
 
         labels = []
         gtboxes = []
+        anchorboxes = []
         batch_images = torch.zeros((batch_size, 3, batch_height, batch_width))
         input_size = np.array([batch_height, batch_width])
         for i in range(batch_size):
@@ -69,22 +70,25 @@ def create_minibatch_func(config):
                 img, boxes = flip_img_boxes(img, boxes)
 
             # transform or data augmentation
-            img = normalize_image(img)
+            #!!!
+            # img = normalize_image(img)
             img = img.transpose(2, 0, 1)
             img = torch.Tensor(img)
             # assign anchors
             boxes = torch.Tensor(boxes)
-            label, boxes = anchor_layer.assign(boxes, label, input_size=input_size,
+            label, boxes, anchorboxes_i = anchor_layer.assign(boxes, label, input_size=input_size,
                                                neg_thresh=config['negative_anchor_threshold'],
                                                pos_thresh=config['positive_anchor_threshold'])
 
             labels.append(label.unsqueeze(0))
             gtboxes.append(boxes.unsqueeze(0))
+            anchorboxes.append(anchorboxes_i.unsqueeze(0))
             # print(img.shape, batch_images.shape)
             batch_images[i, :, :h, :w] = img
 
         labels = torch.cat(labels, dim=0)
         gtboxes = torch.cat(gtboxes, dim=0)
-        return batch_images, labels, gtboxes
+        anchorboxes = torch.cat(anchorboxes, dim=0)
+        return batch_images, labels, gtboxes, anchorboxes
 
     return collate_minibatch
