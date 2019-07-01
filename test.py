@@ -7,6 +7,7 @@ import argparse
 import json
 import tqdm
 import torch
+import os
 import numpy as np
 from lib.det_ops.anchors import compute_anchor_whs, generate_anchors
 from lib.bbox import bbox, box_transform
@@ -14,8 +15,11 @@ from lib.nms import nms
 from utils.logger import load_checkpoints
 from models import retina
 from IPython import embed
-from datasets import voc, coco
+from datasets import voc, coco, images
 from cfgs import config as cfg
+from torchvision.datasets import ImageFolder
+
+import warnings
 
 
 def inference(model, dataset, anchor_wh, strides, result_file, config):
@@ -23,10 +27,19 @@ def inference(model, dataset, anchor_wh, strides, result_file, config):
     model.eval()
     num_samples = len(dataset)
     pbar = tqdm.tqdm(range(num_samples))
+
+    if os.path.exists(result_file):
+        try:
+            os.remove(result_file)
+        except:
+            print("Error while deleting current file and opening new file: ", result_file)
+
+    results = []
+
     with torch.no_grad():
-        for idx in pbar:
+        for i, idx in enumerate(pbar):
             img, im_name, scale, im_size = dataset[idx]
-            h, w = img.shape[1], img.shape[2]
+
             img = img.cuda()
             cls_pred, bbox_pred = model(img.unsqueeze(0))
             scores = cls_pred.sigmoid()
@@ -35,20 +48,24 @@ def inference(model, dataset, anchor_wh, strides, result_file, config):
             # cls [N, C]
             scores = scores[0]
 
+            h, w = img.shape[1], img.shape[2]
+
             anchors = generate_anchors(anchor_wh, input_size=np.array([h, w]),
                                        strides=strides)
             anchors = anchors.cuda()
 
             # transform to bboxes
-            boxes = box_transform.bbox_transform_inv(anchors, bbox_pred)
+            boxes = box_transform.bbox_transform_inv(anchors, bbox_pred.squeeze())
             boxes = boxes/scale
-            boxes = bbox.clip_boxes(boxes, im_size[0], im_size[1])
+            #boxes = bbox.clip_boxes(boxes, im_size[0], im_size[1])
 
             filter_boxes_inds_x = boxes[:, 0] >= boxes[:, 2]
             filter_boxes_inds_y = boxes[:, 1] >= boxes[:, 3]
             filter_boxes_inds = (1 - filter_boxes_inds_x) * (1 - filter_boxes_inds_y)
             boxes = boxes[filter_boxes_inds]
             scores = scores[filter_boxes_inds]
+
+            scores = scores.squeeze()
 
             result_boxes = []  # []
             # every class
@@ -92,25 +109,26 @@ def inference(model, dataset, anchor_wh, strides, result_file, config):
             if len(result_boxes) == 0:
                 continue
 
-            result = dict()
-            result['image_id'] = im_name
-            det = []
-            for i in range(len(result_boxes)):
-                cls, s, b, = result_boxes[i]
-                current_det = dict()
-                current_det['prob'] = s
-                current_det['class'] = cls+1
-                current_det['bbox'] = b
+            for j in range(len(result_boxes)):
+                cls, s, b, = result_boxes[j]
+                if s > 0.75:
+                    pred = dict()
 
-                det.append(current_det)
-            result['result'] = det
+                    pred['image_id'] = im_name
+                    pred['score'] = s
+                    pred['category_id'] = cls + 1
+                    pred['bbox'] = b
+                    results.append(pred)
 
-            with open(result_file, 'a+') as f:
-                s = json.dumps(result)
-                f.write('{}\n'.format(s))
+    with open(result_file, 'a+') as f:
+        s = json.dumps(results)
+        f.write(s)
+    print("JSON Finished!")
+    print('File written to: ', result_file)
 
-        print("Det Finished!")
-
+def load_img(path):
+    npi = imread(path)
+    return Image.fromarray(npi)
 
 def validate(args, config):
 
@@ -121,13 +139,17 @@ def validate(args, config):
     model = retina.RetinaNet(config['num_classes']-1, num_anchors, config['basemodel_path']).cuda()
 
     model_path = args.model_path
+    print('Model Path: ', model_path)
     output_file = args.output
     if args.dataset == 'VOC':
         dataset = voc.VOC2012(dataroot=config['data_dir'], imageset=args.imageset, config=config)
     elif args.dataset == 'COCO':
-        dataset = coco.COCODetection(dataroot=config['data_dir'], imageset=args.imageset, config=config)
+        dataset = coco.COCODetection(dataroot=config['data_dir'], imageset=args.imageset, config=config, training=False)
+    elif args.dataset == 'images':
+        dataset = images.ImageData(dataroot=args.path, config=config)
     else:
         raise NotImplemented()
+    print('Dataset: ', len(dataset))
     state_dict, _, _, _ = load_checkpoints(model_path)
     model.load_state_dict(state_dict)
 
@@ -139,14 +161,19 @@ def validate(args, config):
 
 
 if __name__ == '__main__':
+    warnings.filterwarnings("ignore")
+    os.environ["CUDA_VISIBLE_DEVICES"] = '2'
 
     parser = argparse.ArgumentParser('Test RetinaNet')
-    parser.add_argument('-o', '--output', type=str, default='result.det', help='output file path')
+    parser.add_argument('-o', '--output', type=str, default='./result.json', help='output file path')
     parser.add_argument('-m', '--model_path', type=str, help='saved model path')
-    parser.add_argument('-i', '--imageset', type=str, default='val', help='saved model path')
-    parser.add_argument('-e', '--experiment', type=str, default='voc_baseline',
+    parser.add_argument('-i', '--imageset', type=str, default='val', help='imageset to predict')
+    parser.add_argument('-p', '--path', type=str, default='',
+                        help='path, where to find the image set')
+    parser.add_argument('-e', '--experiment', type=str, default='coco_baseline',
                         help='experiment name, correspond to `config.py`')
-    parser.add_argument('-ds', '--dataset', type=str, default='VOC', help='dataset')
+    parser.add_argument('-ds', '--dataset', type=str, default='COCO', help='dataset')
+
     _args = parser.parse_args()
     config = cfg.config[_args.experiment]
     _args = parser.parse_args()
