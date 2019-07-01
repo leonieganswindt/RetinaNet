@@ -9,29 +9,12 @@ import argparse
 
 
 CLASSES = ('__BG__',
-           'aeroplane',
-           'bicycle',
-           'bird',
-           'boat',
-           'bottle',
-           'bus',
-           'car',
-           'cat',
-           'chair',
-           'cow',
-           'diningtable',
-           'dog',
-           'horse',
-           'motorbike',
-           'person',
-           'pottedplant',
-           'sheep',
-           'sofa',
-           'train',
-           'tvmonitor')
+           'mating',
+           'single_cell',
+           'crowd')
 
 
-ID_CLASSES = dict(zip(range(21), CLASSES))
+ID_CLASSES = dict(zip(range(4), CLASSES))
 
 
 def show_img(im_path, boxes):
@@ -51,7 +34,7 @@ def show_img(im_path, boxes):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--dt', default='', type=str)
+    parser.add_argument('-d', '--dt', default='/scratch/ganswindt/retinanet/result.json', type=str)
     args = parser.parse_args()
     with open(args.dt, 'r') as f:
         lines = f.readlines()
@@ -67,7 +50,7 @@ def main():
         dt[name] = _boxes
 
     for k in dt.keys():
-        show_img('/home/thcheng/workspace/VOCdevkit/VOC2012/JPEGImages/'+k+'.jpg', dt[k])
+        show_img('/scratch/ganswindt/retinanet/coco_output/JPEGImages/'+k+'.jpg', dt[k])
 
 
 if __name__ == '__main__':
