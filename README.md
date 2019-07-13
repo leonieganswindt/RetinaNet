@@ -70,7 +70,7 @@ python test.py -m log/coco_baseline/model_dump/epochxxx.pth -ds COCO -e coco_bas
 Open the Jupyter Notebook:
 
 ```
-'Retinanet_Visualization.ipynb'
+'Retinanet_Visualize.ipynb'
 ```
 
 and follow the instructions:

@@ -10,7 +10,14 @@ from torchvision.transforms import transforms
 from skimage.external.tifffile import imread, imsave
 from skimage import img_as_float
 
+
 class ImageData(Dataset):
+    """
+    ImageData:
+
+    dataroot [image folder]
+    config [config file]
+    """
 
     def get_ids(self, paths):
         tmp = glob.glob(paths)
@@ -38,7 +45,6 @@ class ImageData(Dataset):
     def get_img_path(self, img_id):
         tmp = img_id + '.tif'
         filepath = os.path.join(self.images_dir, tmp)
-        print(filepath)
         return filepath
 
     def __getitem__(self, idx):

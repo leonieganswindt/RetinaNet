@@ -26,11 +26,6 @@ def bbox_transform(boxes, gtboxes):
     anchor_y = boxes[:, 1]
     anchor_w = boxes[:, 2]
     anchor_h = boxes[:, 3]
-    # anchor_w = boxes[:, 2] - boxes[:, 0] + 1
-    # anchor_h = boxes[:, 3] - boxes[:, 1] + 1
-    # # center
-    # anchor_x = boxes[:, 0] + 0.5 * anchor_w
-    # anchor_y = boxes[:, 1] + 0.5 * anchor_h
 
     delta_x = (gt_x - anchor_x) / anchor_w
     delta_y = (gt_y - anchor_y) / anchor_h

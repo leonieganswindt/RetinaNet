@@ -21,6 +21,8 @@ from torchvision.datasets import ImageFolder
 
 import warnings
 
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 
 def inference(model, dataset, anchor_wh, strides, result_file, config):
 
@@ -57,7 +59,6 @@ def inference(model, dataset, anchor_wh, strides, result_file, config):
             # transform to bboxes
             boxes = box_transform.bbox_transform_inv(anchors, bbox_pred.squeeze())
             boxes = boxes/scale
-            #boxes = bbox.clip_boxes(boxes, im_size[0], im_size[1])
 
             filter_boxes_inds_x = boxes[:, 0] >= boxes[:, 2]
             filter_boxes_inds_y = boxes[:, 1] >= boxes[:, 3]
@@ -126,9 +127,11 @@ def inference(model, dataset, anchor_wh, strides, result_file, config):
     print("JSON Finished!")
     print('File written to: ', result_file)
 
+
 def load_img(path):
     npi = imread(path)
     return Image.fromarray(npi)
+
 
 def validate(args, config):
 
@@ -161,7 +164,6 @@ def validate(args, config):
 
 
 if __name__ == '__main__':
-    warnings.filterwarnings("ignore")
     os.environ["CUDA_VISIBLE_DEVICES"] = '2'
 
     parser = argparse.ArgumentParser('Test RetinaNet')

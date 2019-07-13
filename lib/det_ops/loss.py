@@ -50,9 +50,6 @@ class SigmoidFocalLoss(nn.Module):
         onehot = onehot_target[:, :, 1:].float()
         mask = mask.unsqueeze(2).float()
 
-        # pred_sigmoid = pred_sigmoid.clamp(min=1e-6, max=1-1e-6)
-        # bce = -(onehot * torch.log(pred_sigmoid) + (1-onehot)*torch.log(1-pred_sigmoid))
-
         weight = self.alpha*((1-pred_sigmoid).pow(self.gamma))*onehot \
             + (1-self.alpha)*(pred_sigmoid.pow(self.gamma))*(1-onehot)
         weight = weight * mask

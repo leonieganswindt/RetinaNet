@@ -3,7 +3,6 @@ import json
 import argparse
 import sys
 sys.path.append('../')
-# from datasets import coco
 from pycocotools import coco
 
 def convert(detpath, jsonpath):
@@ -33,7 +32,6 @@ def convert(detpath, jsonpath):
     json_str = json.dumps(result)
     with open(jsonpath, 'w') as f:
         f.write(json_str)
-
 
 
 if __name__ == '__main__':

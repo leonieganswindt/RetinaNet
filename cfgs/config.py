@@ -59,22 +59,12 @@ config = {
         "data_dir": '/scratch/ganswindt/retinanet/COCO/DIR/',
 
         # anchor config
-        #"positive_anchor_threshold": 0.7,
-        #"negative_anchor_threshold": 0.4,
         "positive_anchor_threshold": 0.8,
         "negative_anchor_threshold": 0.4,
-        #"anchor_sizes": [2 ** 0, 2 ** (1 / 3), 2 ** (2 / 3)],
-        #"aspect_ratios": [0.5, 1, 2],
-        #"anchor_sizes": [2 ** 0, 2 ** (1 / 4), 2 ** (2 / 4), 2 ** (3 / 4)],
         "anchor_sizes": [2, 4, 8, 16, 32],
         "aspect_ratios": [0.1, 0.25, 0.5, 1, 2],
-        #"aspect_ratios": [0.5, 1, 2, 3],
         "anchor_areas": [8 ** 2, 16 ** 2, 32 ** 2, 64 ** 2, 128 ** 2],
         "strides": [8, 16, 32, 64, 128],
-        #"anchor_areas": [4 ** 2, 8 ** 2, 16 ** 2, 32 ** 2, 64 ** 2],
-        #"strides": [4, 8, 16, 32, 64],
-        #"anchor_areas": [16 ** 2, 32 ** 2, 64 ** 2, 128 ** 2, 512 ** 2],
-        #"strides": [16, 32, 64, 128, 512],
         "base_size": 8,
 
         # dataset
@@ -86,13 +76,12 @@ config = {
         "test_max_image_size": 800,
         "pre_nms_boxes": 1000,
         "test_nms": 0.8,
-        #"test_nms": 0.3,
         "test_max_boxes": 100,
         "cls_thresh": 0.7,
 
         # log
-        "logdir": '/scratch/ganswindt/retinanet/log_2906',
-        "tb_dump_dir": "/scratch/ganswindt/retinanet/log_2906/2906_1",
+        "logdir": '/scratch/ganswindt/retinanet/log_1107',
+        "tb_dump_dir": "/scratch/ganswindt/retinanet/log_1107/1107_1",
         "model_dump_dir": "",
     }
 

@@ -26,6 +26,10 @@ from torchvision.utils import make_grid
 import matplotlib.pyplot as plt
 
 import datetime
+import warnings
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 
 def initialize(config, args):
 
@@ -36,7 +40,6 @@ def initialize(config, args):
         os.mkdir(os.path.join(logdir, args.experiment))
 
     model_dump_dir = os.path.join(logdir, args.experiment, 'model_dump')
-    #tb_dump = os.path.join(logdir, args.experiment, 'tb_dump')
     tb_dump = config['tb_dump_dir']
 
     if not os.path.exists(model_dump_dir):
@@ -45,7 +48,6 @@ def initialize(config, args):
     if not os.path.exists(tb_dump):
         os.mkdir(tb_dump)
 
-    #config['tb_dump_dir'] = tb_dump
     config['model_dump_dir'] = model_dump_dir
 
 
@@ -120,12 +122,6 @@ def train(args, config):
             lr = learning_rate_decay(optimizer, global_step, config)
             img, labels, boxes, anchors = next(data_iter)
 
-            #add image to tensorboard
-            tbimg = make_grid(img)
-            #writer.add_images('img', img, epoch)
-
-            #writer.add_image_with_boxes('img with BBox', img[0], boxes[0], epoch)
-
             img = img.cuda()
             labels = labels.long().cuda()
             boxes = boxes.cuda()
@@ -151,26 +147,6 @@ def train(args, config):
             scores = cls_outputs
             max_score, max_labels = torch.max(scores[0], dim=1)
 
-
-            """
-            good_anchors = []
-            for cls in range(config['num_classes'] - 1):
-
-                # filter predictions through 'classification threshold'
-                score = scores[:, cls]
-                cls_inds = score > config['cls_thresh']
-                # current class has the max score over all classes
-                max_inds = max_labels == cls
-                cls_inds = max_inds * cls_inds
-                if cls_inds.sum() < 1:
-                    continue
-
-                # _boxes [K, 4]
-                good_anchors.append(anchors[cls_inds])
-
-            good_anchors = torch.cat(good_anchors, dim=0)
-            """
-
             good_anchors = anchors[0][max_score > config['cls_thresh']]
 
             # learning rate decay
@@ -178,7 +154,6 @@ def train(args, config):
         if epoch % 25 == 0:
             writer.add_images('img', img, epoch)
             writer.add_image_with_boxes('img with gt BBox', img[0], anchors[0][labels[0]>0], epoch)
-            # TODO: plot only good boxes
             writer.add_image_with_boxes('img with predicted BBox', img[0], good_anchors, epoch)
 
         print("e:{} loss: {}".format(epoch, np.mean(losses)))

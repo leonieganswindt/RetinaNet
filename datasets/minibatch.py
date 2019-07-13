@@ -70,8 +70,6 @@ def create_minibatch_func(config):
                 img, boxes = flip_img_boxes(img, boxes)
 
             # transform or data augmentation
-            #!!!
-            # img = normalize_image(img)
             img = img.transpose(2, 0, 1)
             img = torch.Tensor(img)
             # assign anchors
@@ -83,7 +81,6 @@ def create_minibatch_func(config):
             labels.append(label.unsqueeze(0))
             gtboxes.append(boxes.unsqueeze(0))
             anchorboxes.append(anchorboxes_i.unsqueeze(0))
-            # print(img.shape, batch_images.shape)
             batch_images[i, :, :h, :w] = img
 
         labels = torch.cat(labels, dim=0)

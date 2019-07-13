@@ -25,8 +25,6 @@ class AnchorLayer:
 
         self._anchor_sizes = self._compute_anchor_size()
 
-        # self._num_anchors = len(self.scales) * len(self.aspect_ratios)
-
     def _compute_anchor_size(self):
         return compute_anchor_whs(len(self.strides), self.areas, self.aspect_ratios, self.sizes)
 

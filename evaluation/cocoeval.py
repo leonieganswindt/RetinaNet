@@ -18,7 +18,6 @@ def coco_bbox_eval(result_file, annotation_file):
 
     ann_type = 'bbox'
     coco_gt = COCO.COCO(annotation_file)
-    #print('COCO_gt: ', coco_gt)
     coco_dt = coco_gt.loadRes(result_file)
     print('COCO_dt: ', coco_dt)
     cocoevaler = COCOeval.COCOeval(coco_gt, coco_dt, ann_type)

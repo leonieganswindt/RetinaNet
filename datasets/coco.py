@@ -41,9 +41,7 @@ class COCODetection(Dataset):
             transforms.ToTensor(),
             transforms.ToPILImage(),
             transforms.Resize((1024, 1024)),
-            transforms.ToTensor(),
-            #transforms.Normalize(mean=[.485, .456, .406], std=[.229, .224, .225])
-            #transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+            transforms.ToTensor()
         ])
         catids = self.coco_helper.getCatIds()
         catids = [0] + catids
@@ -77,8 +75,6 @@ class COCODetection(Dataset):
     def __getitem__(self, idx):
         im_id = self.img_ids[idx]
         img_path = self.get_img_path(im_id)
-        #img = Image.open(img_path).convert('I')
-        #img = np.asarray(img)
 
         img = imread(img_path)
         img = np.array(img).astype('float32')
@@ -92,40 +88,30 @@ class COCODetection(Dataset):
         source_image = source_image.convert('RGB')
         imsave('./input_image', img[:, :, 1].astype(np.float32), imagej=True)
 
-        #img = Image.fromarray(np.uint8(i))
-
         if not self.training:
             img = np.array(img).astype('float32')
             h, w = img.shape[:2]
             resize_h, resize_w, scale = get_im_scale(h, w, target_size=self.config['test_image_size'][0],
                                                  max_size=self.config['test_max_image_size'])
             img = cv2.resize(img, (resize_w, resize_h))
-            #img = normalize_image(img)
             img = img.transpose(2, 0, 1)
             img = torch.Tensor(img)
             return img, im_id, scale, (h, w)
 
         annotations = self.load_annotation(im_id)
 
-        #print(annotations)
         boxes = np.array([x[0] for x in annotations], dtype='float32')
         if boxes.shape[0] == 0:
             boxes = np.array([[0, 0, 0, 0]], dtype='float32')
         # x1,y1,w,h -> x1,y1,x2,y2
         boxes[:, 2:] = boxes[:, 2:] + boxes[:, :2] - 1
-        # boxes = np_xywh2xyxy(boxes)
 
 
         draw = ImageDraw.Draw(source_image)
 
         for i, bbox in enumerate(boxes):
-            #tmp_x = bbox[2] - bbox[0]
-            #tmp_y = bbox[3] - bbox[1]
-            #draw.rectangle((bbox[0], bbox[1], tmp_x, tmp_y), outline='red')
             draw.rectangle((bbox[0], bbox[1], bbox[2], bbox[3]), outline='red')
-            #draw.text((bbox[0] + 5, bbox[1] + 5), str(klass_tmp[i]))
         source_image.save('./input_image_boxes', 'JPEG')
-
 
         labels = torch.LongTensor([x[1] for x in annotations])
 
